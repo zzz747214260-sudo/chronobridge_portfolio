@@ -452,7 +452,7 @@ const MemoryDNA = () => {
   useEffect(() => {
     const t = setInterval(() => {
       setActiveCol((p) => (p + 1) % cols);
-    }, 1200); // 逐列点亮速度（你可改）
+    }, 1200);
     return () => clearInterval(t);
   }, []);
 
@@ -475,7 +475,7 @@ const MemoryDNA = () => {
         <div className="absolute left-0 right-0 top-0 h-[2px] bg-blue-400/70 shadow-[0_0_18px_rgba(59,130,246,0.55)] animate-[scan_4s_linear_infinite]" />
       </div>
 
-      {/* 横向进度轨道（蓝条从第一个指向最后一个） */}
+      {/* 横向进度轨道 */}
       <div className="absolute left-16 right-16 top-[150px] h-px bg-slate-800/80">
         <div
           className="h-full bg-blue-400/90 shadow-[0_0_14px_rgba(59,130,246,0.55)] transition-transform duration-700 ease-in-out origin-left"
@@ -491,26 +491,38 @@ const MemoryDNA = () => {
             const isActive = i === activeCol;
 
             return (
-              <div key={i} className="relative w-0.5 h-[240px] flex flex-col justify-between items-center">
+              // 关键：每列加 group，tooltip 绑定 group-hover
+              <div
+                key={i}
+                className="relative w-0.5 h-[240px] flex flex-col justify-between items-center group"
+              >
                 {/* 上节点（蓝） */}
                 <div
                   className={[
-                    "absolute top-0 -left-2 w-4 h-4 rounded-full border-2 transition-all duration-500",
+                    "absolute top-0 -left-2 w-4 h-4 rounded-full border-2 transition-all duration-300 cursor-pointer z-20",
                     "bg-[#0a1428]",
                     reached
                       ? "border-blue-400 shadow-[0_0_16px_rgba(59,130,246,0.75)]"
-                      : "border-slate-700 shadow-none opacity-50",
+                      : "border-slate-700 opacity-60",
+                    "group-hover:scale-150 group-hover:bg-blue-500",
                     isActive ? "scale-125" : "",
                   ].join(" ")}
-                />
+                >
+                  {/* TOOLTIP（上节点） */}
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-40 bg-[#0a1428] border border-blue-500 p-3 rounded text-[10px] text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl z-30 whitespace-nowrap text-center">
+                    <div className="font-bold mb-1">MEMORY_FRAG_0{i}A</div>
+                    <span className="text-slate-300 text-[9px]">TYPE: VISUAL CORTEX</span>
+                  </div>
+                </div>
 
-                {/* 连接线（随进度点亮） */}
+                {/* 连接线 */}
                 <div
                   className={[
-                    "w-0.5 h-full transition-all duration-700",
+                    "w-0.5 h-full transition-all duration-500",
                     reached
                       ? "bg-gradient-to-b from-blue-500/70 to-red-500/60"
                       : "bg-slate-800/70",
+                    "group-hover:from-blue-500/90 group-hover:to-red-500/90",
                     isActive ? "shadow-[0_0_18px_rgba(59,130,246,0.25)]" : "",
                   ].join(" ")}
                 />
@@ -518,16 +530,23 @@ const MemoryDNA = () => {
                 {/* 下节点（红） */}
                 <div
                   className={[
-                    "absolute bottom-0 -left-2 w-4 h-4 rounded-full border-2 transition-all duration-500",
+                    "absolute bottom-0 -left-2 w-4 h-4 rounded-full border-2 transition-all duration-300 cursor-pointer z-20",
                     "bg-[#0a1428]",
                     reached
                       ? "border-red-400 shadow-[0_0_14px_rgba(239,68,68,0.65)]"
-                      : "border-slate-700 shadow-none opacity-50",
+                      : "border-slate-700 opacity-60",
+                    "group-hover:scale-125 group-hover:bg-red-500",
                     isActive ? "scale-110" : "",
                   ].join(" ")}
-                />
+                >
+                  {/* TOOLTIP（下节点） */}
+                  <div className="absolute top-6 left-1/2 -translate-x-1/2 w-40 bg-[#0a1428] border border-red-500 p-3 rounded text-[10px] text-red-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl z-30 whitespace-nowrap text-center">
+                    <div className="font-bold mb-1">MEMORY_FRAG_0{i}B</div>
+                    <span className="text-slate-300 text-[9px]">TYPE: EMOTIONAL</span>
+                  </div>
+                </div>
 
-                {/* 可选：底部编号/标签（更有“系统感”） */}
+                {/* 底部编号 */}
                 <div
                   className={[
                     "absolute -bottom-10 text-[9px] font-mono tracking-widest transition-opacity duration-300",
