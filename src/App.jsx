@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 // --- Global Configuration ---
-const apiKey = "AIzaSyCVAKleaES-Y6PO83KVIZ9-wza6zF4NsFU"; // Keep empty
+const apiKey = "AIzaSyCcptIsYstO1SRjF_HuLJDz7vK3DD1fWKc"; // Keep empty
 const genAI = new GoogleGenerativeAI(apiKey);
 
 // --- CSS & Keyframes ---
@@ -613,6 +613,7 @@ export default function ChronoBridge() {
       setDreamOutput(result.response.text());
     } catch (e) {
       setTimeout(() => setDreamOutput("Simulating: Neon rain falls on chrome streets. You remember the ocean before it rose."), 1500);
+      setDreamOutput(`ERROR: ${e?.message || String(e)}`);
     } finally { setAiLoading(false); }
   };
 
