@@ -9,6 +9,7 @@ import {
   PieChart, AlertTriangle, Heart, Globe, Wifi, Command, Minimize, Hexagon,
   Radar, Crosshair, Server
 } from 'lucide-react';
+import SciFiInteractiveBackground from './Dream3D'; // 导入背景组件
 
 // --- Global Configuration ---
 const apiKey = "AIzaSyCcptIsYstO1SRjF_HuLJDz7vK3DD1fWKc"; // Keep empty
@@ -26,10 +27,12 @@ const GlobalStyles = () => (
     }
 
     body {
-      background-color: #030507;
+      <SciFiInteractiveBackground />
       color: #e2e8f0;
       font-family: 'Rajdhani', sans-serif;
       overflow: hidden;
+      margin: 0;
+      padding: 0;
     }
 
     .font-mono { font-family: 'JetBrains Mono', monospace; }
@@ -70,15 +73,15 @@ const GlobalStyles = () => (
     @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     @keyframes spin-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
     @keyframes scan {
-  0% { transform: translateY(-120%); opacity: 0.0; }
-  15% { opacity: 0.9; }
-  100% { transform: translateY(120%); opacity: 0.0; }
-}
+      0% { transform: translateY(-120%); opacity: 0.0; }
+      15% { opacity: 0.9; }
+      100% { transform: translateY(120%); opacity: 0.0; }
+    }
 
-@keyframes loading {
-  0% { transform: scaleX(0); }
-  100% { transform: scaleX(1); }
-}
+    @keyframes loading {
+      0% { transform: scaleX(0); }
+      100% { transform: scaleX(1); }
+    }
 
     .animate-spin-slow { animation: spin-slow 30s linear infinite; }
     .animate-spin-reverse { animation: spin-reverse 35s linear infinite; }
@@ -87,6 +90,25 @@ const GlobalStyles = () => (
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #050a14; }
     ::-webkit-scrollbar-thumb { background: #1e3a8a; border-radius: 3px; }
+
+    /* 背景容器样式 */
+    // .background-container {
+    //   position: fixed;
+    //   top: 0;
+    //   left: 0;
+    //   right: 0;
+    //   bottom: 0;
+    //   z-index: -2; /* 放在最底层 */
+    //   pointer-events: none;
+    // }
+    
+    /* 主内容容器 */
+    .content-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+    }
   `}</style>
 );
 
@@ -417,7 +439,7 @@ const HeroUnit = ({ activePart, setActivePart, scale = 1 }) => {
   return (
     <div className="relative w-full h-[400px] flex items-center justify-center perspective-1000" style={{ transform: `scale(${scale})` }}>
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[400px] h-[400px] border border-dashed border-blue-500/20 rounded-full animate-spin-slow" />
+        <div className="w-[400px] h-[400px] border border-dashed  rounded-full animate-spin-slow" />
         <div className="absolute w-[320px] h-[320px] border border-dotted border-cyan-500/30 rounded-full animate-spin-reverse" />
       </div>
 
@@ -617,319 +639,339 @@ export default function ChronoBridge() {
     } finally { setAiLoading(false); }
   };
 
+  // 包装整个应用，添加背景
+  const AppWithBackground = ({ children }) => (
+    <div className="fixed inset-0 overflow-hidden">
+      {/* 背景层 - 只有一个全局背景 */}
+      <div className="background-container">
+        <SciFiInteractiveBackground />
+      </div>
+      
+      {/* 内容层 */}
+      <div className="content-container">
+        {children}
+      </div>
+      
+      {/* 扫描线效果 */}
+      <div className="scanlines" />
+    </div>
+  );
+
   // --- BOOT SCREEN (Terminal) ---
   if (bootState === 'BOOTING') {
     return (
-      <div className="fixed inset-0 bg-[#020408] flex items-center justify-center flex-col z-50">
-        <GlobalStyles />
-        <div className="w-[400px] relative">
-          <div className="flex justify-between items-end mb-4 border-b border-slate-800 pb-2">
-            <span className="text-xs font-mono text-cyan-500">CHRONO_BIOS_v4.0</span>
-            <span className="text-xs font-mono text-slate-500 animate-pulse">LOADING...</span>
-          </div>
-          <div className="font-mono text-[12px] text-slate-400 space-y-2 h-32">
-            {logs.map((l, i) => <div key={i} className="animate-in slide-in-from-left-2 duration-300"> <span className="text-blue-500 mr-2">&gt;</span>{l}</div>)}
+      <AppWithBackground>
+        <div className="w-full h-full flex items-center justify-center flex-col">
+          <GlobalStyles />
+          <div className="w-[400px] relative z-10">
+            <div className="flex justify-between items-end mb-4 border-b border-slate-800 pb-2">
+              <span className="text-xs font-mono text-cyan-500">CHRONO_BIOS_v4.0</span>
+              <span className="text-xs font-mono text-slate-500 animate-pulse">LOADING...</span>
+            </div>
+            <div className="font-mono text-[12px] text-slate-400 space-y-2 h-32">
+              {logs.map((l, i) => <div key={i} className="animate-in slide-in-from-left-2 duration-300"> <span className="text-blue-500 mr-2">&gt;</span>{l}</div>)}
+            </div>
           </div>
         </div>
-        <div className="scanlines" />
-      </div>
+      </AppWithBackground>
     );
   }
 
   // --- HERO SCREEN (The Animation you wanted) ---
   if (bootState === 'HERO') {
     return (
-      <div className="fixed inset-0 bg-[#020408] flex flex-col items-center justify-center z-50 animate-in fade-in duration-1000">
+      <AppWithBackground>
         <GlobalStyles />
-        <div className="scanlines" />
+        <div className="w-full h-full flex flex-col items-center justify-center animate-in fade-in duration-1000">
+          {/* Animated Helmet */}
+          <div className="scale-125 animate-in zoom-in-95 duration-[2000ms]">
+            <HeroUnit activePart={1} setActivePart={() => { }} />
+          </div>
 
-        {/* Animated Helmet */}
-        <div className="scale-125 animate-in zoom-in-95 duration-[2000ms]">
-          <HeroUnit activePart={1} setActivePart={() => { }} />
+          {/* Title Sequence */}
+          <div className="mt-16 text-center space-y-8 animate-in slide-in-from-bottom-12 duration-1000 delay-500 fill-mode-backwards z-20">
+            <h1 className="text-6xl font-thin text-white tracking-[0.3em] uppercase drop-shadow-[0_0_20px_rgba(6,182,212,0.5)]">
+              Chrono<span className="font-bold text-cyan-400">Bridge</span>
+            </h1>
+            <p className="text-slate-500 tracking-[0.5em] text-xs uppercase font-mono">
+              Intertemporal Memory Recovery System
+            </p>
+
+            <button
+              onClick={() => setBootState('DASHBOARD')}
+              className="mt-12 group relative px-12 py-5 bg-transparent overflow-hidden border border-slate-700 rounded-full hover:border-cyan-400/50 hover:bg-cyan-900/10 transition-all duration-500"
+            >
+              <span className="relative z-10 text-xs font-bold text-slate-300 tracking-[0.2em] group-hover:text-white transition-colors flex items-center gap-3">
+                INITIALIZE SYSTEM <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </span>
+            </button>
+          </div>
         </div>
-
-        {/* Title Sequence */}
-        <div className="mt-16 text-center space-y-8 animate-in slide-in-from-bottom-12 duration-1000 delay-500 fill-mode-backwards z-20">
-          <h1 className="text-6xl font-thin text-white tracking-[0.3em] uppercase drop-shadow-[0_0_20px_rgba(6,182,212,0.5)]">
-            Chrono<span className="font-bold text-cyan-400">Bridge</span>
-          </h1>
-          <p className="text-slate-500 tracking-[0.5em] text-xs uppercase font-mono">
-            Intertemporal Memory Recovery System
-          </p>
-
-          <button
-            onClick={() => setBootState('DASHBOARD')}
-            className="mt-12 group relative px-12 py-5 bg-transparent overflow-hidden border border-slate-700 rounded-full hover:border-cyan-400/50 hover:bg-cyan-900/10 transition-all duration-500"
-          >
-            <span className="relative z-10 text-xs font-bold text-slate-300 tracking-[0.2em] group-hover:text-white transition-colors flex items-center gap-3">
-              INITIALIZE SYSTEM <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </span>
-          </button>
-        </div>
-      </div>
+      </AppWithBackground>
     );
   }
 
   // --- MAIN DASHBOARD (Spacious Layout) ---
   return (
-    <div className="flex h-screen bg-[#030507] text-slate-200 overflow-hidden relative selection:bg-cyan-500/30 selection:text-white font-sans">
+    <AppWithBackground>
       <GlobalStyles />
-      <div className="scanlines" />
-
-      {/* Sidebar */}
-      <aside className="w-72 bg-[#05080f]/95 backdrop-blur-2xl border-r border-slate-800/50 flex flex-col z-20 shadow-[4px_0_24px_rgba(0,0,0,0.4)]">
-        <div className="p-10 border-b border-slate-800/50">
-          <div className="flex items-center gap-4">
-            <Hexagon className="text-cyan-500 fill-cyan-900/20" size={36} />
-            <div>
-              <h1 className="text-xl font-bold tracking-widest text-white">CHRONO</h1>
-              <div className="text-[10px] font-mono text-cyan-500 tracking-[0.4em]">BRIDGE</div>
+      <div className="flex h-screen text-slate-200 overflow-hidden selection:bg-cyan-500/30 selection:text-white font-sans">
+        {/* Sidebar */}
+        <aside className="w-72 bg-[#05080f]/95 backdrop-blur-2xl border-r border-slate-800/50 flex flex-col z-10 shadow-[4px_0_24px_rgba(0,0,0,0.4)]">
+          <div className="p-10 border-b border-slate-800/50">
+            <div className="flex items-center gap-4">
+              <Hexagon className="text-cyan-500 fill-cyan-900/20" size={36} />
+              <div>
+                <h1 className="text-xl font-bold tracking-widest text-white">CHRONO</h1>
+                <div className="text-[10px] font-mono text-cyan-500 tracking-[0.4em]">BRIDGE</div>
+              </div>
             </div>
           </div>
-        </div>
-        <nav className="flex-1 p-6 overflow-y-auto space-y-2">
-          {[
-            { id: 'DASHBOARD', icon: Activity, label: 'Market & Trends' },
-            { id: 'NEURAL', icon: Brain, label: 'Neural Mapping' },
-            { id: 'DREAM', icon: Sparkles, label: 'Dream Lab', ai: true },
-            { id: 'HARDWARE', icon: Cpu, label: 'Hardware Specs' },
-            { id: 'ARCHIVE', icon: Dna, label: 'Neural Data Storage' },
-          ].map((item) => (
-            <CyberButton key={item.id} active={activeTab === item.id} onClick={() => setActiveTab(item.id)} icon={item.icon} isAi={item.ai}>{item.label}</CyberButton>
-          ))}
-        </nav>
-        <div className="p-6 border-t border-slate-800/50 bg-[#020408] text-[10px] text-slate-600 font-mono text-center">
-          POWERED BY ALCOR • 2185
-        </div>
-      </aside>
+          <nav className="flex-1 p-6 overflow-y-auto space-y-2">
+            {[
+              { id: 'DASHBOARD', icon: Activity, label: 'Market & Trends' },
+              { id: 'NEURAL', icon: Brain, label: 'Neural Mapping' },
+              { id: 'DREAM', icon: Sparkles, label: 'Dream Lab', ai: true },
+              { id: 'HARDWARE', icon: Cpu, label: 'Hardware Specs' },
+              { id: 'ARCHIVE', icon: Dna, label: 'Neural Data Storage' },
+            ].map((item) => (
+              <CyberButton key={item.id} active={activeTab === item.id} onClick={() => setActiveTab(item.id)} icon={item.icon} isAi={item.ai}>{item.label}</CyberButton>
+            ))}
+          </nav>
+          <SciFiInteractiveBackground />
+          <div className="p-6 border-t border-slate-800/50 text-[10px] text-slate-600 font-mono text-center">
+            <SciFiInteractiveBackground />
+            POWERED BY ALCOR • 2185
+          </div>         
+        </aside>
 
-      {/* Content */}
-      <main className="flex-1 relative flex flex-col overflow-hidden bg-[radial-gradient(circle_at_top_right,_rgba(17,24,39,0.4),_transparent_50%)]">
-        <header className="h-20 border-b border-slate-800/50 flex items-center justify-between px-10 bg-[#05080f]/50 backdrop-blur-sm z-10">
-          <div className="flex items-center gap-4">
-            <Command size={18} className="text-slate-500" />
-            <div className="h-5 w-[1px] bg-slate-700" />
-            <span className="text-sm font-mono text-cyan-500 uppercase tracking-widest animate-pulse">{activeTab} MODULE</span>
-          </div>
-          <div className="flex gap-8 text-[10px] font-mono text-slate-400">
-            <span className="flex items-center gap-2"><Globe size={14} className="text-blue-500" /> GLOBAL NETWORK</span>
-            <span className="flex items-center gap-2"><Wifi size={14} className="text-green-500" /> ONLINE</span>
-          </div>
-        </header>
+        {/* Content */}
+        <main className="flex-1 relative flex flex-col overflow-hidden">
+          <header className="h-20 border-b border-slate-800/50 flex items-center justify-between px-10 z-10">
+            <div className="flex items-center gap-4">
+              <Command size={18} className="text-slate-500" />
+              <div className="h-5 w-[1px] bg-slate-700" />
+              <span className="text-sm font-mono text-cyan-500 uppercase tracking-widest animate-pulse">{activeTab} MODULE</span>
+            </div>
+            <div className="flex gap-8 text-[10px] font-mono text-slate-400">
+              <span className="flex items-center gap-2"><Globe size={14} className="text-blue-500" /> GLOBAL NETWORK</span>
+              <span className="flex items-center gap-2"><Wifi size={14} className="text-green-500" /> ONLINE</span>
+            </div>
+          </header>
 
-        <div className="flex-1 overflow-y-auto p-10 relative scroll-smooth">
-          <div className="max-w-[1600px] mx-auto space-y-10 pb-20"> {/* Increased Max Width & Spacing */}
+          <div className="flex-1 overflow-y-auto p-10 relative scroll-smooth">
+            <div className="max-w-[1600px] mx-auto space-y-10 pb-20"> {/* Increased Max Width & Spacing */}
 
-            {/* === DASHBOARD === */}
-            {activeTab === 'DASHBOARD' && (
-              <div className="grid grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                <div className="col-span-12 mb-6">
-                  <ProcessPipeline />
-
-                  <h2 className="text-4xl font-light text-white mb-3 mt-10"><ScrambleText text="Market Analysis & User Sentiment" delay={200} /></h2>
-                  <p className="text-slate-400 text-base max-w-3xl leading-relaxed">Data projection for Cryonics Market (2185) and user acceptance rates for Dream Intervention Technology. Data sourced from Alcor & Research Interviews.</p>
-                </div>
-
-                <div className="col-span-12 grid grid-cols-4 gap-8">
-                  <DataCard title="USER APPROVAL" value="92%" label="POSITIVE" delay={100} variant="blue" />
-                  <DataCard title="FUTURE SIM" value="83%" label="PREFERRED" delay={200} variant="blue" />
-                  <DataCard title="ALCOR SHARE" value="50%" label="DOMINANT" delay={300} variant="blue" />
-                  <DataCard title="THREAT LEVEL" value="LOW" label="STABLE" delay={400} variant="red" />
-                </div>
-
-                <HoloCard className="col-span-4 p-8 flex flex-col justify-between" delay={100}>
-                  <h3 className="text-sm font-bold text-cyan-400 tracking-widest uppercase flex items-center gap-2 mb-6"><PieChart size={16} /> Cryonics Market Share</h3>
-                  <MarketShareChart />
-                  <div className="mt-6 text-[10px] text-slate-500 text-center font-mono tracking-widest">DOMINANT PLAYER: ALCOR (50%)</div>
-                </HoloCard>
-
-                <HoloCard className="col-span-4 p-8 flex flex-col justify-center" delay={200}>
-                  <h3 className="text-sm font-bold text-green-400 tracking-widest uppercase mb-8 flex items-center gap-2"><User size={16} /> User Acceptance</h3>
-                  <div className="space-y-8">
-                    <div>
-                      <div className="flex justify-between text-xs font-mono mb-3 text-slate-300">
-                        <span>SUPPORT INTERVENTION</span>
-                        <span className="text-green-400 font-bold">92%</span>
-                      </div>
-                      <div className="h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-                        <div className="h-full bg-green-500 w-[92%] animate-[loading_2s_ease-out_forwards]" />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-xs font-mono mb-3 text-slate-300">
-                        <span>PREFER FUTURE SIMULATION</span>
-                        <span className="text-blue-400 font-bold">83%</span>
-                      </div>
-                      <div className="h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-                        <div className="h-full bg-blue-500 w-[83%] animate-[loading_2s_ease-out_forwards_0.5s]" />
-                      </div>
-                    </div>
+              {/* === DASHBOARD === */}
+              {activeTab === 'DASHBOARD' && (
+                <div className="grid grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                  <div className="col-span-12 mb-6">
+                    <ProcessPipeline />
+                    <h2 className="text-4xl font-light text-white mb-3 mt-10"><ScrambleText text="Market Analysis & User Sentiment" delay={200} /></h2>
+                    <p className="text-slate-400 text-base max-w-3xl leading-relaxed">Data projection for Cryonics Market (2185) and user acceptance rates for Dream Intervention Technology. Data sourced from Alcor & Research Interviews.</p>
                   </div>
-                </HoloCard>
 
-                <HoloCard className="col-span-4 p-8" delay={300}>
-                  <h3 className="text-sm font-bold text-purple-400 tracking-widest uppercase mb-6 flex items-center gap-2"><Crosshair size={16} /> Competitive Landscape</h3>
-                  <div className="h-64">
-                    <CompetitorRadar />
+                  <div className="col-span-12 grid grid-cols-4 gap-8">
+                    <DataCard title="USER APPROVAL" value="92%" label="POSITIVE" delay={100} variant="blue" />
+                    <DataCard title="FUTURE SIM" value="83%" label="PREFERRED" delay={200} variant="blue" />
+                    <DataCard title="ALCOR SHARE" value="50%" label="DOMINANT" delay={300} variant="blue" />
+                    <DataCard title="THREAT LEVEL" value="LOW" label="STABLE" delay={400} variant="red" />
                   </div>
-                </HoloCard>
 
-                <div className="col-span-12 grid grid-cols-3 gap-8">
-                  {[
-                    { title: 'Mental Adjustment', sol: 'VR Therapy / AI Counseling', icon: Brain, color: 'text-pink-400' },
-                    { title: 'Tech Adaptation', sol: 'Rapid Re-education Programs', icon: Terminal, color: 'text-yellow-400' },
-                    { title: 'Physical Risks', sol: 'Nanotech Regeneration', icon: ShieldAlert, color: 'text-red-400' }
-                  ].map((item, i) => (
-                    <HoloCard key={i} className="p-6 flex items-start gap-5" delay={400 + (i * 100)}>
-                      <div className={`p-4 rounded-xl bg-slate-900 border border-slate-800 ${item.color} shadow-lg`}>
-                        <item.icon size={24} />
-                      </div>
-                      <div>
-                        <div className="text-sm font-bold text-slate-200 uppercase tracking-wider mb-2">{item.title}</div>
-                        <div className="text-xs font-mono text-cyan-500/80">SOLUTION: {item.sol}</div>
-                      </div>
-                    </HoloCard>
-                  ))}
-                </div>
-              </div>
-            )}
+                  <HoloCard className="col-span-4 p-8 flex flex-col justify-between" delay={100}>
+                    <h3 className="text-sm font-bold text-cyan-400 tracking-widest uppercase flex items-center gap-2 mb-6"><PieChart size={16} /> Cryonics Market Share</h3>
+                    <MarketShareChart />
+                    <div className="mt-6 text-[10px] text-slate-500 text-center font-mono tracking-widest">DOMINANT PLAYER: ALCOR (50%)</div>
+                  </HoloCard>
 
-            {/* === NEURAL === */}
-            {activeTab === 'NEURAL' && (
-              <div className="grid grid-cols-12 gap-8 animate-in zoom-in-95 duration-500 h-[calc(100vh-240px)]">
-                <div className="col-span-4 flex flex-col gap-8">
-                  <HoloCard className="p-8">
-                    <h3 className="text-sm font-bold text-slate-400 tracking-widest mb-8">WAVEFORM CONTROL</h3>
+                  <HoloCard className="col-span-4 p-8 flex flex-col justify-center" delay={200}>
+                    <h3 className="text-sm font-bold text-green-400 tracking-widest uppercase mb-8 flex items-center gap-2"><User size={16} /> User Acceptance</h3>
                     <div className="space-y-8">
                       <div>
-                        <div className="flex justify-between text-xs font-mono mb-3">
-                          <span className="text-cyan-400">THETA (4-8Hz)</span>
-                          <span>{theta}Hz</span>
+                        <div className="flex justify-between text-xs font-mono mb-3 text-slate-300">
+                          <span>SUPPORT INTERVENTION</span>
+                          <span className="text-green-400 font-bold">92%</span>
                         </div>
-                        <input type="range" min="4" max="8" step="0.1" value={theta} onChange={(e) => setTheta(Number(e.target.value))} className="w-full h-2 bg-slate-800 appearance-none rounded-lg cursor-pointer accent-cyan-500" />
+                        <div className="h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                          <div className="h-full bg-green-500 w-[92%] animate-[loading_2s_ease-out_forwards]" />
+                        </div>
                       </div>
                       <div>
-                        <div className="flex justify-between text-xs font-mono mb-3">
-                          <span className="text-purple-400">GAMMA (31-100Hz)</span>
-                          <span>{gamma}Hz</span>
+                        <div className="flex justify-between text-xs font-mono mb-3 text-slate-300">
+                          <span>PREFER FUTURE SIMULATION</span>
+                          <span className="text-blue-400 font-bold">83%</span>
                         </div>
-                        <input type="range" min="31" max="100" value={gamma} onChange={(e) => setGamma(Number(e.target.value))} className="w-full h-2 bg-slate-800 appearance-none rounded-lg cursor-pointer accent-purple-500" />
+                        <div className="h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                          <div className="h-full bg-blue-500 w-[83%] animate-[loading_2s_ease-out_forwards_0.5s]" />
+                        </div>
                       </div>
                     </div>
                   </HoloCard>
 
-                  <HoloCard className="p-8 flex-1">
-                    <h3 className="text-sm font-bold text-slate-400 tracking-widest mb-6">ACTIVE REGION DATA</h3>
-                    <div className="p-6 bg-slate-950/50 rounded-xl border border-slate-800 mb-6">
-                      <div className="text-[10px] font-mono text-slate-500 mb-2">SELECTED ZONE</div>
-                      <div className="text-2xl text-white font-bold">{activeBrainRegion}</div>
-                    </div>
-                    <div className="text-sm text-slate-400 leading-relaxed font-mono">
-                      {hoveredBrainRegion ? (
-                        <>
-                          <span className="text-cyan-400 font-bold block mb-2">{hoveredBrainRegion.name}</span>
-                          {hoveredBrainRegion.info}
-                        </>
-                      ) : "Hover over map..."}
+                  <HoloCard className="col-span-4 p-8" delay={300}>
+                    <h3 className="text-sm font-bold text-purple-400 tracking-widest uppercase mb-6 flex items-center gap-2"><Crosshair size={16} /> Competitive Landscape</h3>
+                    <div className="h-64">
+                      <CompetitorRadar />
                     </div>
                   </HoloCard>
-                </div>
 
-                <div className="col-span-4 relative">
-                  <HoloCard className="h-full p-6 flex items-center justify-center">
-                    <BrainRegionMap activeRegion={activeBrainRegion} setActiveRegion={setActiveBrainRegion} setHoveredRegion={setHoveredBrainRegion} />
-                  </HoloCard>
+                  <div className="col-span-12 grid grid-cols-3 gap-8">
+                    {[
+                      { title: 'Mental Adjustment', sol: 'VR Therapy / AI Counseling', icon: Brain, color: 'text-pink-400' },
+                      { title: 'Tech Adaptation', sol: 'Rapid Re-education Programs', icon: Terminal, color: 'text-yellow-400' },
+                      { title: 'Physical Risks', sol: 'Nanotech Regeneration', icon: ShieldAlert, color: 'text-red-400' }
+                    ].map((item, i) => (
+                      <HoloCard key={i} className="p-6 flex items-start gap-5" delay={400 + (i * 100)}>
+                        <div className={`p-4 rounded-xl bg-slate-900 border border-slate-800 ${item.color} shadow-lg`}>
+                          <item.icon size={24} />
+                        </div>
+                        <div>
+                          <div className="text-sm font-bold text-slate-200 uppercase tracking-wider mb-2">{item.title}</div>
+                          <div className="text-xs font-mono text-cyan-500/80">SOLUTION: {item.sol}</div>
+                        </div>
+                      </HoloCard>
+                    ))}
+                  </div>
                 </div>
+              )}
 
-                <div className="col-span-4">
-                  <HoloCard className="h-full p-0 relative">
-                    <div className="absolute top-6 left-6 z-10 text-[10px] font-mono text-cyan-500 tracking-widest">REAL-TIME SIGNAL</div>
-                    <BrainVisualizer theta={theta} gamma={gamma} />
-                  </HoloCard>
-                </div>
-              </div>
-            )}
-
-            {/* === HARDWARE === */}
-            {activeTab === 'HARDWARE' && (
-              <div className="grid grid-cols-12 gap-8 animate-in zoom-in-95 duration-500">
-                <div className="col-span-8">
-                  <HoloCard className="p-16 flex items-center justify-center bg-gradient-to-b from-[#0a101f] to-[#020408] min-h-[600px]">
-                    <HeroUnit activePart={activeHardware} setActivePart={setActiveHardware} scale={1.2} />
-                  </HoloCard>
-                </div>
-                <div className="col-span-4 flex flex-col gap-8">
-                  <HoloCard className="p-8">
-                    <h3 className="text-sm font-bold text-slate-400 tracking-widest mb-6">COMPONENT DETAILS</h3>
-                    <div className="text-3xl font-light text-white mb-4">
-                      {activeHardware === 1 && "AI Agent Chip"}
-                      {activeHardware === 0 && "Memory Foam"}
-                      {activeHardware === 2 && "EEG Detector"}
-                      {activeHardware === 3 && "Micro-Response Sensor"}
-                      {activeHardware === 4 && "Eye Muscle Tracker"}
-                    </div>
-                    <div className="h-px w-full bg-slate-800 mb-6" />
-                    <p className="text-sm text-slate-400 leading-loose font-mono">
-                      {activeHardware === 1 && "Customizes dreams for memory recall and future adaptation using generative algorithms."}
-                      {activeHardware === 0 && "Ensures stability and comfort during long-term cryogenic sleep integration."}
-                      {activeHardware === 2 && "Monitors REM sleep cycles for precise dream intervention timing."}
-                      {activeHardware === 3 && "Detects subtle physical reactions to adjust dream intensity in real-time."}
-                      {activeHardware === 4 && "Tracks rapid eye movement to correlate visual dream stimuli."}
-                    </p>
-                  </HoloCard>
-                  <HoloCard className="p-8 flex-1">
-                    <h3 className="text-sm font-bold text-slate-400 tracking-widest mb-6">TECH SPECS</h3>
-                    <ul className="space-y-4 text-xs font-mono text-slate-500">
-                      <li className="flex justify-between border-b border-slate-800 pb-2"><span>CONNECTION</span> <span className="text-cyan-400">BLUETOOTH 8.0</span></li>
-                      <li className="flex justify-between border-b border-slate-800 pb-2"><span>BATTERY</span> <span className="text-cyan-400">WIRELESS / POD POWER</span></li>
-                      <li className="flex justify-between border-b border-slate-800 pb-2"><span>MATERIAL</span> <span className="text-cyan-400">SILICONE / GRAPHENE</span></li>
-                      <li className="flex justify-between"><span>LATENCY</span> <span className="text-cyan-400">&lt; 1MS</span></li>
-                    </ul>
-                  </HoloCard>
-                </div>
-              </div>
-            )}
-
-            {/* === DREAM LAB === */}
-            {activeTab === 'DREAM' && (
-              <div className="grid grid-cols-12 gap-8 h-[calc(100vh-240px)] animate-in slide-in-from-bottom-8">
-                <div className="col-span-5 flex flex-col gap-8">
-                  <HoloCard className="p-10 flex-1 flex flex-col">
-                    <div className="flex items-center gap-4 mb-8">
-                      <div className="p-3 bg-purple-900/30 rounded-xl border border-purple-500/30">
-                        <Sparkles size={24} className="text-purple-400" />
+              {/* === NEURAL === */}
+              {activeTab === 'NEURAL' && (
+                <div className="grid grid-cols-12 gap-8 animate-in zoom-in-95 duration-500 h-[calc(100vh-240px)]">
+                  <div className="col-span-4 flex flex-col gap-8">
+                    <HoloCard className="p-8">
+                      <h3 className="text-sm font-bold text-slate-400 tracking-widest mb-8">WAVEFORM CONTROL</h3>
+                      <div className="space-y-8">
+                        <div>
+                          <div className="flex justify-between text-xs font-mono mb-3">
+                            <span className="text-cyan-400">THETA (4-8Hz)</span>
+                            <span>{theta}Hz</span>
+                          </div>
+                          <input type="range" min="4" max="8" step="0.1" value={theta} onChange={(e) => setTheta(Number(e.target.value))} className="w-full h-2 bg-slate-800 appearance-none rounded-lg cursor-pointer accent-cyan-500" />
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-xs font-mono mb-3">
+                            <span className="text-purple-400">GAMMA (31-100Hz)</span>
+                            <span>{gamma}Hz</span>
+                          </div>
+                          <input type="range" min="31" max="100" value={gamma} onChange={(e) => setGamma(Number(e.target.value))} className="w-full h-2 bg-slate-800 appearance-none rounded-lg cursor-pointer accent-purple-500" />
+                        </div>
                       </div>
-                      <div>
-                        <h2 className="text-xl font-bold text-white">Dream Synthesis</h2>
-                        <p className="text-sm text-slate-500">Powered by Gemini Neural Engine</p>
+                    </HoloCard>
+
+                    <HoloCard className="p-8 flex-1">
+                      <h3 className="text-sm font-bold text-slate-400 tracking-widest mb-6">ACTIVE REGION DATA</h3>
+                      <div className="p-6 bg-slate-950/50 rounded-xl border border-slate-800 mb-6">
+                        <div className="text-[10px] font-mono text-slate-500 mb-2">SELECTED ZONE</div>
+                        <div className="text-2xl text-white font-bold">{activeBrainRegion}</div>
                       </div>
-                    </div>
-                    <textarea value={dreamSeed} onChange={(e) => setDreamSeed(e.target.value)} placeholder="Enter dream parameters..." className="flex-1 bg-[#05080f] border border-slate-700 rounded-xl p-6 text-sm text-slate-300 focus:outline-none focus:border-cyan-500 placeholder-slate-700 resize-none font-mono mb-6 leading-relaxed" />
-                    <CyberButton onClick={handleDreamGen} active={aiLoading} icon={Zap} isAi>{aiLoading ? 'SYNTHESIZING...' : 'GENERATE SCENARIO'}</CyberButton>
-                  </HoloCard>
+                      <div className="text-sm text-slate-400 leading-relaxed font-mono">
+                        {hoveredBrainRegion ? (
+                          <>
+                            <span className="text-cyan-400 font-bold block mb-2">{hoveredBrainRegion.name}</span>
+                            {hoveredBrainRegion.info}
+                          </>
+                        ) : "Hover over map..."}
+                      </div>
+                    </HoloCard>
+                  </div>
+
+                  <div className="col-span-4 relative">
+                    <HoloCard className="h-full p-6 flex items-center justify-center">
+                      <BrainRegionMap activeRegion={activeBrainRegion} setActiveRegion={setActiveBrainRegion} setHoveredRegion={setHoveredBrainRegion} />
+                    </HoloCard>
+                  </div>
+
+                  <div className="col-span-4">
+                    <HoloCard className="h-full p-0 relative">
+                      <div className="absolute top-6 left-6 z-10 text-[10px] font-mono text-cyan-500 tracking-widest">REAL-TIME SIGNAL</div>
+                      <BrainVisualizer theta={theta} gamma={gamma} />
+                    </HoloCard>
+                  </div>
                 </div>
-                <div className="col-span-7">
-                  <HoloCard className="h-full p-12 flex items-center justify-center text-center relative">
-                    {!dreamOutput && !aiLoading && <div className="text-slate-600 font-mono text-base">AWAITING INPUT...</div>}
-                    {dreamOutput && <div className="text-xl font-light leading-loose text-slate-200 max-w-2xl text-left"><Typewriter text={dreamOutput} /></div>}
-                  </HoloCard>
+              )}
+
+              {/* === HARDWARE === */}
+              {activeTab === 'HARDWARE' && (
+                <div className="grid grid-cols-12 gap-8 animate-in zoom-in-95 duration-500">
+                  <div className="col-span-8">
+                    <HoloCard className="p-16 flex items-center justify-center bg-gradient-to-b from-[#0a101f] to-[#020408] min-h-[600px]">
+                      <HeroUnit activePart={activeHardware} setActivePart={setActiveHardware} scale={1.2} />
+                    </HoloCard>
+                  </div>
+                  <div className="col-span-4 flex flex-col gap-8">
+                    <HoloCard className="p-8">
+                      <h3 className="text-sm font-bold text-slate-400 tracking-widest mb-6">COMPONENT DETAILS</h3>
+                      <div className="text-3xl font-light text-white mb-4">
+                        {activeHardware === 1 && "AI Agent Chip"}
+                        {activeHardware === 0 && "Memory Foam"}
+                        {activeHardware === 2 && "EEG Detector"}
+                        {activeHardware === 3 && "Micro-Response Sensor"}
+                        {activeHardware === 4 && "Eye Muscle Tracker"}
+                      </div>
+                      <div className="h-px w-full bg-slate-800 mb-6" />
+                      <p className="text-sm text-slate-400 leading-loose font-mono">
+                        {activeHardware === 1 && "Customizes dreams for memory recall and future adaptation using generative algorithms."}
+                        {activeHardware === 0 && "Ensures stability and comfort during long-term cryogenic sleep integration."}
+                        {activeHardware === 2 && "Monitors REM sleep cycles for precise dream intervention timing."}
+                        {activeHardware === 3 && "Detects subtle physical reactions to adjust dream intensity in real-time."}
+                        {activeHardware === 4 && "Tracks rapid eye movement to correlate visual dream stimuli."}
+                      </p>
+                    </HoloCard>
+                    <HoloCard className="p-8 flex-1">
+                      <h3 className="text-sm font-bold text-slate-400 tracking-widest mb-6">TECH SPECS</h3>
+                      <ul className="space-y-4 text-xs font-mono text-slate-500">
+                        <li className="flex justify-between border-b border-slate-800 pb-2"><span>CONNECTION</span> <span className="text-cyan-400">BLUETOOTH 8.0</span></li>
+                        <li className="flex justify-between border-b border-slate-800 pb-2"><span>BATTERY</span> <span className="text-cyan-400">WIRELESS / POD POWER</span></li>
+                        <li className="flex justify-between border-b border-slate-800 pb-2"><span>MATERIAL</span> <span className="text-cyan-400">SILICONE / GRAPHENE</span></li>
+                        <li className="flex justify-between"><span>LATENCY</span> <span className="text-cyan-400">&lt; 1MS</span></li>
+                      </ul>
+                    </HoloCard>
+                  </div>
                 </div>
-              </div>
-            )}
-            {/* === ARCHIVE === */}
-            {activeTab === 'ARCHIVE' && (
-              <div className="grid grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                <div className="col-span-12">
-                  <MemoryDNA />
+              )}
+
+              {/* === DREAM LAB === */}
+              {activeTab === 'DREAM' && (
+                <div className="grid grid-cols-12 gap-8 h-[calc(100vh-240px)] animate-in slide-in-from-bottom-8">
+                  <div className="col-span-5 flex flex-col gap-8">
+                    <HoloCard className="p-10 flex-1 flex flex-col">
+                      <div className="flex items-center gap-4 mb-8">
+                        <div className="p-3 bg-purple-900/30 rounded-xl border border-purple-500/30">
+                          <Sparkles size={24} className="text-purple-400" />
+                        </div>
+                        <div>
+                          <h2 className="text-xl font-bold text-white">Dream Synthesis</h2>
+                          <p className="text-sm text-slate-500">Powered by Gemini Neural Engine</p>
+                        </div>
+                      </div>
+                      <textarea value={dreamSeed} onChange={(e) => setDreamSeed(e.target.value)} placeholder="Enter dream parameters..." className="flex-1 bg-[#05080f] border border-slate-700 rounded-xl p-6 text-sm text-slate-300 focus:outline-none focus:border-cyan-500 placeholder-slate-700 resize-none font-mono mb-6 leading-relaxed" />
+                      <CyberButton onClick={handleDreamGen} active={aiLoading} icon={Zap} isAi>{aiLoading ? 'SYNTHESIZING...' : 'GENERATE SCENARIO'}</CyberButton>
+                    </HoloCard>
+                  </div>
+                  <div className="col-span-7">
+                    <HoloCard className="h-full p-12 flex items-center justify-center text-center relative">
+                      {!dreamOutput && !aiLoading && <div className="text-slate-600 font-mono text-base">AWAITING INPUT...</div>}
+                      {dreamOutput && <div className="text-xl font-light leading-loose text-slate-200 max-w-2xl text-left"><Typewriter text={dreamOutput} /></div>}
+                    </HoloCard>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+              {/* === ARCHIVE === */}
+              {activeTab === 'ARCHIVE' && (
+                <div className="grid grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                  <div className="col-span-12">
+                    <MemoryDNA />
+                  </div>
+                </div>
+              )}
 
 
+            </div>
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </AppWithBackground>
   );
 }
 
