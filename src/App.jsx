@@ -12,7 +12,7 @@ import {
 import SciFiInteractiveBackground from './Dream3D'; // 导入背景组件
 
 // --- Global Configuration ---
-const apiKey = "AIzaSyCcptIsYstO1SRjF_HuLJDz7vK3DD1fWKc"; // Keep empty
+const apiKey = "AIzaSyC51bntOsZ_79pawjJX8gI6tAvQzuKDMuc"; // Keep empty
 const genAI = new GoogleGenerativeAI(apiKey);
 
 // --- CSS & Keyframes ---
