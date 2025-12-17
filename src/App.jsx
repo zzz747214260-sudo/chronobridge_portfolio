@@ -715,10 +715,10 @@ export default function ChronoBridge() {
   return (
     <AppWithBackground>
       <GlobalStyles />
-      <div className="flex h-screen text-slate-200 overflow-hidden selection:bg-cyan-500/30 selection:text-white font-sans">
+      <div className="bg-[#020408] flex h-screen text-slate-200 overflow-hidden selection:bg-cyan-500/30 selection:text-white font-sans">
         {/* Sidebar */}
         <aside className="w-72 bg-[#05080f]/95 backdrop-blur-2xl border-r border-slate-800/50 flex flex-col z-10 shadow-[4px_0_24px_rgba(0,0,0,0.4)]">
-          <div className="p-10 border-b border-slate-800/50">
+          <div className="p-10 bg-[#020408] border-b border-slate-800/50">
             <div className="flex items-center gap-4">
               <Hexagon className="text-cyan-500 fill-cyan-900/20" size={36} />
               <div>
@@ -727,7 +727,7 @@ export default function ChronoBridge() {
               </div>
             </div>
           </div>
-          <nav className="flex-1 p-6 overflow-y-auto space-y-2">
+          <nav className="flex-1 p-6 overflow-y-auto space-y-2 bg-[#020408]">
             {[
               { id: 'DASHBOARD', icon: Activity, label: 'Market & Trends' },
               { id: 'NEURAL', icon: Brain, label: 'Neural Mapping' },
@@ -739,7 +739,7 @@ export default function ChronoBridge() {
             ))}
           </nav>
           <SciFiInteractiveBackground />
-          <div className="p-6 border-t border-slate-800/50 text-[10px] text-slate-600 font-mono text-center">
+          <div className="p-6 border-t border-slate-800/50 bg-[#020408] text-[10px] text-slate-600 font-mono text-center">
             <SciFiInteractiveBackground />
             POWERED BY ALCOR • 2185
           </div>         

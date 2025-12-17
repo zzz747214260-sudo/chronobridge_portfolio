@@ -11,7 +11,7 @@ const SciFiInteractiveBackground = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     sceneRef.current.appendChild(renderer.domElement);
 
-    scene.background = new THREE.Color(0x0c0c0c);
+    scene.background = new THREE.Color(0x071625);
 
     // 创建粒子系统
     const particleCount = 5000;
