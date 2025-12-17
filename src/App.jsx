@@ -746,7 +746,7 @@ export default function ChronoBridge() {
         </aside>
 
         {/* Content */}
-        <main className="flex-1 relative flex flex-col overflow-hidden">
+        <main className="flex-1 bg-[#020408] relative flex flex-col overflow-hidden">
           <header className="h-20 border-b border-slate-800/50 flex items-center justify-between px-10 z-10">
             <div className="flex items-center gap-4">
               <Command size={18} className="text-slate-500" />
